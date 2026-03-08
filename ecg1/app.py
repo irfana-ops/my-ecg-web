@@ -11,6 +11,7 @@ from math import radians, cos, sin, asin, sqrt
 from utils.image_processing import process_ecg_image
 from utils.signal_analysis import analyze_ecg_signal
 from collections import Counter
+import pandas as pd
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
@@ -51,9 +52,79 @@ def upload_file():
             
     return jsonify({'error': 'File type not allowed'}), 400
 
+@app.route('/login')
+def login_page():
+    return render_template('login.html')
+
+@app.route('/signup')
+def signup_page():
+    return render_template('signup.html')
+
+@app.route('/api/dataset')
+def dataset_sample():
+    # Prefer real Kaggle dataset; fall back to synthetic
+    kaggle_path   = 'model_training/mitbih_train.csv'
+    synthetic_path = 'model_training/ecg_dataset.csv'
+
+    if os.path.exists(kaggle_path):
+        dataset_path = kaggle_path
+        is_kaggle = True
+    elif os.path.exists(synthetic_path):
+        dataset_path = synthetic_path
+        is_kaggle = False
+    else:
+        return jsonify({'error': 'Dataset not found'}), 404
+
+    try:
+        if is_kaggle:
+            # MIT-BIH has no header; last column is label 0-4
+            df = pd.read_csv(dataset_path, header=None)
+            label_col = df.columns[-1]
+        else:
+            df = pd.read_csv(dataset_path)
+            label_col = 'Label'
+
+        total_rows = len(df)
+        label_counts = df[label_col].value_counts().to_dict()
+
+        # For the preview, rename columns nicely
+        sample_df = df.head(100).copy()
+        if is_kaggle:
+            col_names = {c: str(c) for c in df.columns[:-1]}
+            col_names[label_col] = 'Label'
+            sample_df = sample_df.rename(columns=col_names)
+
+        sample_data = sample_df.to_dict(orient='records')
+
+        return jsonify({
+            'total_samples': total_rows,
+            'normal_samples': int(label_counts.get(0, 0)),
+            'abnormal_samples': int(total_rows - label_counts.get(0, 0)),
+            'label_distribution': {str(k): int(v) for k, v in label_counts.items()},
+            'is_kaggle': is_kaggle,
+            'data': sample_data
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/dashboard')
+def dashboard_page():
+    return render_template('dashboard.html')
+
 @app.route('/process')
 def process_page():
     return render_template('process.html')
+
+@app.route('/dataset')
+def dataset_page():
+    return render_template('dataset.html')
+
+@app.route('/download-dataset')
+def download_dataset():
+    dataset_path = 'model_training/ecg_dataset.csv'
+    if not os.path.exists(dataset_path):
+        return jsonify({'error': 'Dataset not found'}), 404
+    return send_file(dataset_path, as_attachment=True, download_name='ecg_training_dataset.csv', mimetype='text/csv')
 
 def crop_lead_region(image_path):
     """
@@ -167,8 +238,9 @@ def process_file():
             cropped_base64 = base64.b64encode(buffer).decode('utf-8')
         else:
             # --- Single-Lead Path ---
-            # Single-lead images typically show 10 seconds of data.
-            single_duration = 10.0
+            # Single-lead images from the web are usually closer to 6-7 seconds in width
+            # (e.g. 3-4 beats). 10 seconds causes normal HR to look like Bradycardia.
+            single_duration = 6.5
             fs = width / single_duration
             
             signal_data = process_ecg_image(filepath)
@@ -250,7 +322,8 @@ def generate_pdf():
             ['Metric', 'Measured Value', 'Classification / Status'],
             ['Heart Rate', f"{analysis.get('heart_rate', 0)} BPM", abnormality],
             ['Stress Level', analysis.get('stress_level', 'N/A'), '-'],
-            ['Result Summary', abnormality, 'Requires Review' if abnormality != 'Normal' else 'Normal']
+            ['Result Summary', abnormality, 'Requires Review' if abnormality != 'Normal' else 'Normal'],
+            ['Deep Learning Analysis', analysis.get('dl_prediction', 'N/A'), 'AI Prediction']
         ]
         metrics_table = Table(metrics_data, colWidths=[1.5*inch, 1.5*inch, 2.5*inch])
         metrics_table.setStyle(TableStyle([

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - ECG Digitize{% endblock %}
+
+{% block content %}
+<div class="auth-container animated-fade-in">
+    <div class="auth-card glassmorphism">
+        <div class="auth-header">
+            <h1>Create Account</h1>
+            <p>Start tracking your heart health today</p>
+        </div>
+
+        <form id="signup-form" class="auth-form">
+            <div class="input-group">
+                <label for="full-name">Full Name</label>
+                <input type="text" id="full-name" placeholder="John Doe" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="name@example.com" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Min 6 characters" minlength="6" required>
+            </div>
+
+            <div id="auth-error" class="validation-msg hidden"></div>
+
+            <button type="submit" class="btn-primary" id="btn-signup">
+                <span class="btn-text">Register Now</span>
+                <div class="spinner-small hidden"></div>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="/login">Log in</a></p>
+            <p class="home-link"><a href="/login">← Back to login</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-container {
+        max-width: 450px;
+        margin: 6rem auto;
+    }
+
+    .auth-card {
+        padding: 3rem;
+        background: var(--surface);
+        border-radius: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+    }
+
+    .glassmorphism {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: -0.025em;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-header p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .auth-footer {
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    .auth-footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .home-link {
+        margin-top: 1rem;
+        font-size: 0.85rem;
+    }
+
+    .home-link a {
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}

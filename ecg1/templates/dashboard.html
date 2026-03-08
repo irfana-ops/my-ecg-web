@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ECG Digitize{% endblock %}
+
+{% block content %}
+<div class="dashboard-container animated-fade-in" id="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome, <span id="user-display-name">User</span></h1>
+        <p>Your cardiac health history and trends</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- History Card -->
+        <div class="card history-card">
+            <div class="card-header">
+                <h2>Scan History</h2>
+                <button class="btn-refresh" title="Refresh history" id="btn-refresh-history">
+                    <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                        <path d="M3 3v5h5" />
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+            <div id="history-list" class="history-list">
+                <div class="loading-state">
+                    <div class="spinner-small"></div>
+                    <p>Loading your history...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trend Card -->
+        <div class="card trend-card">
+            <div class="card-header">
+                <h2>Heart Rate Trend</h2>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div class="chart-footer">
+                <p id="trend-analysis">Perform more scans to see your heart rate trends.</p>
+            </div>
+        </div>
+
+        <!-- District Insights Card -->
+        <div class="card district-card" style="grid-column: 1 / -1; margin-top: 1.5rem;">
+            <div class="card-header">
+                <h2>Kerala District Health Insights</h2>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Comparison of "Normal" vs "High
+                Stress" ECG scans across districts (Aggregated Anonymously)</p>
+            <div class="chart-wrapper" style="height: 300px;">
+                <canvas id="districtChart"></canvas>
+            </div>
+            <div class="chart-footer" id="district-footer">
+                <p id="district-analysis">Loading regional comparisons...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--background);
+        border-radius: 0.75rem;
+        border: 1px solid var(--border);
+        transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .history-item:hover {
+        transform: translateX(4px);
+        border-color: var(--primary);
+    }
+
+    .history-info {
+        flex: 1;
+    }
+
+    .history-info h4 {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .history-meta {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .history-status {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    /* Delete button */
+    .btn-delete-record {
+        background: transparent;
+        border: 1px solid transparent;
+        color: #94a3b8;
+        border-radius: 0.5rem;
+        padding: 0.4rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+        flex-shrink: 0;
+    }
+
+    .btn-delete-record:hover {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #ef4444;
+    }
+
+    .btn-delete-record:disabled {
+        cursor: not-allowed;
+    }
+
+    /* Refresh button */
+    .btn-refresh {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        border-radius: 0.5rem;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .btn-refresh:hover {
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .btn-refresh.spinning svg {
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .chart-footer {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .empty-text {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .error-text {
+        color: #ef4444;
+        padding: 1.5rem;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}

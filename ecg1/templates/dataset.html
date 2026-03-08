@@ -1,0 +1,532 @@
+{% extends "base.html" %}
+{% block title %}ECG Training Dataset - ECG Digitize{% endblock %}
+
+{% block content %}
+<style>
+    .dataset-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+        border-radius: 1.5rem;
+        padding: 3rem 2rem 2rem 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        border: 1px solid rgba(14, 165, 233, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dataset-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230ea5e9' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .dataset-hero h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 0.5rem;
+        position: relative;
+    }
+
+    .dataset-hero p {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        position: relative;
+    }
+
+    .ai-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(14, 165, 233, 0.15);
+        border: 1px solid rgba(14, 165, 233, 0.35);
+        color: #38bdf8;
+        padding: 0.4rem 1rem;
+        border-radius: 99px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--primary);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.4rem;
+    }
+
+    .stat-icon.blue {
+        background: rgba(14, 165, 233, 0.15);
+    }
+
+    .stat-icon.green {
+        background: rgba(16, 185, 129, 0.15);
+    }
+
+    .stat-icon.red {
+        background: rgba(239, 68, 68, 0.15);
+    }
+
+    .stat-icon.purple {
+        background: rgba(139, 92, 246, 0.15);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    .charts-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .charts-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        padding: 1.5rem;
+    }
+
+    .chart-box h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .table-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .table-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .table-scroll {
+        overflow-x: auto;
+    }
+
+    .ds-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+    }
+
+    .ds-table th {
+        background: var(--background);
+        padding: 0.7rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .ds-table td {
+        padding: 0.6rem 1rem;
+        border-top: 1px solid var(--border);
+        font-family: 'Courier New', monospace;
+        white-space: nowrap;
+        color: var(--text-secondary);
+    }
+
+    .ds-table tr:hover td {
+        background: var(--background);
+    }
+
+    .label-pill {
+        display: inline-block;
+        padding: 0.2rem 0.7rem;
+        border-radius: 99px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        font-family: sans-serif;
+    }
+
+    .label-normal {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+    }
+
+    .label-abnormal {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+
+    .error-box {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+
+    .info-note {
+        background: rgba(14, 165, 233, 0.08);
+        border: 1px solid rgba(14, 165, 233, 0.2);
+        border-radius: 0.75rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: #7dd3fc;
+    }
+</style>
+
+<!-- Hero -->
+<div class="dataset-hero">
+    <div class="ai-badge">🤖 Real Clinical Training Data — MIT-BIH Arrhythmia Database</div>
+    <h1>ECG Training Dataset</h1>
+    <p>109,446 real ECG heartbeat segments from the <strong>Kaggle MIT-BIH Arrhythmia Dataset</strong></p>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon blue">📊</div>
+        <div class="stat-value">109K</div>
+        <div class="stat-label">Total Samples</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green">💚</div>
+        <div class="stat-value" style="color:#10b981">72K</div>
+        <div class="stat-label">Normal Beats (Class 0)</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon red">❤️</div>
+        <div class="stat-value" style="color:#ef4444">37K</div>
+        <div class="stat-label">Arrhythmia Beats (1–4)</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon purple">🧠</div>
+        <div class="stat-value" style="color:#8b5cf6">187</div>
+        <div class="stat-label">Signal Points / Beat</div>
+    </div>
+</div>
+
+<!-- Info note -->
+<div class="info-note">
+    ℹ️ <strong>Source:</strong>
+    <a href="https://www.kaggle.com/datasets/shayanfazeli/heartbeat" target="_blank"
+        style="color:#38bdf8;font-weight:600;">
+        Kaggle — ECG Heartbeat Categorization (MIT-BIH)
+    </a>
+    — Real clinical ECG recordings from 47 patients. Each row = one segmented heartbeat with 187 normalized signal
+    values + a class label.
+</div>
+
+<!-- Class breakdown -->
+<div class="table-box">
+    <div class="table-header">
+        <h3>🏷️ MIT-BIH Arrhythmia Class Labels (5 Classes)</h3>
+    </div>
+    <div class="table-scroll">
+        <table class="ds-table">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Code</th>
+                    <th>Medical Name</th>
+                    <th>Description</th>
+                    <th>Count (Train)</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>0</strong></td>
+                    <td>N</td>
+                    <td>Normal Beat</td>
+                    <td>Regular sinus rhythm — healthy heartbeat</td>
+                    <td>72,471</td>
+                    <td><span class="label-pill label-normal">Normal</span></td>
+                </tr>
+                <tr>
+                    <td><strong>1</strong></td>
+                    <td>S</td>
+                    <td>Supraventricular Premature Beat</td>
+                    <td>Heart beats too early from upper chambers (atria)</td>
+                    <td>2,223</td>
+                    <td><span class="label-pill label-abnormal">Abnormal</span></td>
+                </tr>
+                <tr>
+                    <td><strong>2</strong></td>
+                    <td>V</td>
+                    <td>Ventricular Premature Beat</td>
+                    <td>Early beat originating in the lower ventricles — dangerous</td>
+                    <td>5,788</td>
+                    <td><span class="label-pill label-abnormal">Abnormal</span></td>
+                </tr>
+                <tr>
+                    <td><strong>3</strong></td>
+                    <td>F</td>
+                    <td>Fusion Beat</td>
+                    <td>Simultaneous normal + ventricular beat fused together</td>
+                    <td>641</td>
+                    <td><span class="label-pill label-abnormal">Abnormal</span></td>
+                </tr>
+                <tr>
+                    <td><strong>4</strong></td>
+                    <td>Q</td>
+                    <td>Unclassifiable Beat</td>
+                    <td>Paced beats or signals too noisy to classify</td>
+                    <td>7,660</td>
+                    <td><span class="label-pill label-abnormal">Abnormal</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="charts-row">
+    <div class="chart-box">
+        <h3>📊 Class Distribution in MIT-BIH Training Set</h3>
+        <canvas id="distributionChart" height="200"></canvas>
+    </div>
+    <div class="chart-box">
+        <h3>📈 Sample ECG Signal (from live dataset)</h3>
+        <canvas id="sampleSignalChart" height="200"></canvas>
+    </div>
+</div>
+
+<!-- Live Data Table -->
+<div class="table-box">
+    <div class="table-header">
+        <h3>🗂️ Live Data Preview (mitbih_train.csv — first 100 rows)</h3>
+        <a href="/download-dataset" class="btn-primary"
+            style="font-size:0.85rem;padding:0.5rem 1.2rem;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem;">
+            ⬇️ Download CSV
+        </a>
+    </div>
+    <div id="table-loading" style="text-align:center;padding:3rem;color:var(--text-muted);">
+        <div class="spinner-small" style="margin:0 auto 1rem;"></div>
+        <p>Loading dataset...</p>
+    </div>
+    <div class="table-scroll" id="table-wrapper" style="display:none; max-height:450px; overflow-y:auto;">
+        <table class="ds-table">
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+    <div id="table-error" class="error-box" style="display:none;">
+        <p style="font-size:1.1rem;margin-bottom:1rem;">⚠️ <strong>mitbih_train.csv</strong> not found</p>
+        <p style="font-size:0.9rem;margin-bottom:1.5rem;">
+            Download the dataset from Kaggle and copy <strong>mitbih_train.csv</strong> into
+            <code>ecg1/model_training/</code>, then run <code>python model_training/train.py</code>
+        </p>
+        <a href="https://www.kaggle.com/datasets/shayanfazeli/heartbeat" target="_blank" class="btn-primary"
+            style="display:inline-block;text-decoration:none;margin-right:1rem;">
+            📥 Go to Kaggle ↗
+        </a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Static distribution chart (MIT-BIH known counts)
+        new Chart(document.getElementById('distributionChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Normal (0)', 'Supraventricular (1)', 'Ventricular (2)', 'Fusion (3)', 'Unknown (4)'],
+                datasets: [{
+                    data: [72471, 2223, 5788, 641, 7660],
+                    backgroundColor: [
+                        'rgba(16,185,129,0.8)',
+                        'rgba(234,179,8,0.8)',
+                        'rgba(239,68,68,0.8)',
+                        'rgba(168,85,247,0.8)',
+                        'rgba(100,116,139,0.8)'
+                    ],
+                    borderColor: ['#10b981', '#eab308', '#ef4444', '#a855f7', '#64748b'],
+                    borderWidth: 2, hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 10, font: { size: 11 } } } }
+            }
+        });
+
+        // Try loading live data
+        try {
+            const res = await fetch('/api/dataset');
+            if (!res.ok) {
+                document.getElementById('table-loading').style.display = 'none';
+                document.getElementById('table-error').style.display = 'block';
+                // fallback sample signal chart
+                drawFallbackSignal();
+                return;
+            }
+            const json = await res.json();
+
+            // Sample signal chart from real data
+            if (json.data && json.data.length > 0) {
+                const firstRow = json.data[0];
+                const keys = Object.keys(firstRow).filter(k => k !== 'Label');
+                const signalValues = keys.map(k => firstRow[k]);
+                const label = parseInt(firstRow['Label']);
+                const colors = ['#10b981', '#eab308', '#ef4444', '#a855f7', '#64748b'];
+                const names = ['Normal', 'Supraventricular', 'Ventricular', 'Fusion', 'Unknown'];
+                const c = colors[label] || '#0ea5e9';
+
+                new Chart(document.getElementById('sampleSignalChart'), {
+                    type: 'line',
+                    data: {
+                        labels: signalValues.map((_, i) => i),
+                        datasets: [{
+                            label: names[label] || 'ECG Beat',
+                            data: signalValues,
+                            borderColor: c,
+                            backgroundColor: c + '22',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { labels: { color: '#94a3b8' } } },
+                        scales: {
+                            x: { display: false },
+                            y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } }
+                        }
+                    }
+                });
+            }
+
+            // Build table
+            const data = json.data;
+            if (!data || data.length === 0) return;
+
+            const cols = Object.keys(data[0]);
+            const sigCols = cols.filter(c => c !== 'Label').slice(0, 6);
+            const totalSigCols = cols.filter(c => c !== 'Label').length;
+
+            const thead = document.getElementById('table-head');
+            const hRow = document.createElement('tr');
+            hRow.innerHTML = '<th>#</th>' + sigCols.map(c => `<th>col_${c}</th>`).join('') +
+                `<th>... (${totalSigCols - sigCols.length} more cols)</th><th>Label</th>`;
+            thead.appendChild(hRow);
+
+            const labelsMap = { 0: 'Normal', 1: 'Supraventri.', 2: 'Ventricular', 3: 'Fusion', 4: 'Unknown' };
+            const pillClass = { 0: 'label-normal', 1: 'label-abnormal', 2: 'label-abnormal', 3: 'label-abnormal', 4: 'label-abnormal' };
+
+            const tbody = document.getElementById('table-body');
+            data.forEach((row, idx) => {
+                const lbl = parseInt(row['Label']);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td style="color:var(--text-muted);font-weight:600">${idx + 1}</td>` +
+                    sigCols.map(c => `<td>${parseFloat(row[c]).toFixed(4)}</td>`).join('') +
+                    `<td style="color:var(--text-muted)">...</td>` +
+                    `<td><span class="label-pill ${pillClass[lbl]}">${lbl} – ${labelsMap[lbl]}</span></td>`;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('table-loading').style.display = 'none';
+            document.getElementById('table-wrapper').style.display = 'block';
+
+        } catch (err) {
+            document.getElementById('table-loading').style.display = 'none';
+            document.getElementById('table-error').style.display = 'block';
+            drawFallbackSignal();
+        }
+
+        function drawFallbackSignal() {
+            // Draw a conceptual synthetic ECG waveform as demo
+            const t = Array.from({ length: 187 }, (_, i) => i / 187);
+            const signal = t.map(x => {
+                let v = 0;
+                v += 0.1 * Math.exp(-Math.pow((x - 0.15) / 0.03, 2));  // P
+                v += -0.15 * Math.exp(-Math.pow((x - 0.28) / 0.01, 2)); // Q
+                v += 1.0 * Math.exp(-Math.pow((x - 0.30) / 0.012, 2));  // R
+                v += -0.3 * Math.exp(-Math.pow((x - 0.32) / 0.01, 2));  // S
+                v += 0.2 * Math.exp(-Math.pow((x - 0.50) / 0.06, 2));  // T
+                v += (Math.random() - 0.5) * 0.015;
+                return v;
+            });
+            new Chart(document.getElementById('sampleSignalChart'), {
+                type: 'line',
+                data: {
+                    labels: signal.map((_, i) => i),
+                    datasets: [{
+                        label: 'Sample ECG Beat (demo)',
+                        data: signal,
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14,165,233,0.08)',
+                        borderWidth: 1.5, pointRadius: 0, fill: true, tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: '#94a3b8' } } },
+                    scales: {
+                        x: { display: false },
+                        y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
