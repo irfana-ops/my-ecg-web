@@ -9,25 +9,49 @@
             <h1>Welcome Back</h1>
             <p>Log in to access your report history</p>
         </div>
-        
+
         <form id="login-form" class="auth-form">
             <div class="input-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" placeholder="name@example.com" required>
             </div>
             <div class="input-group">
-                <label for="password">Password</label>
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <label for="password">Password</label>
+                    <a href="#" id="show-forgot"
+                        style="font-size: 0.85rem; color: var(--primary); text-decoration: none;">Forgot password?</a>
+                </div>
                 <input type="password" id="password" placeholder="••••••••" required>
             </div>
-            
+
             <div id="auth-error" class="validation-msg hidden"></div>
-            
+
             <button type="submit" class="btn-primary" id="btn-login">
                 <span class="btn-text">Sign In</span>
                 <div class="spinner-small hidden"></div>
             </button>
         </form>
-        
+
+        <form id="forgot-password-form" class="auth-form hidden">
+            <p style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.5rem;">Enter your email address and
+                we'll send you a link to reset your password.</p>
+            <div class="input-group">
+                <label for="reset-email">Email Address</label>
+                <input type="email" id="reset-email" placeholder="name@example.com" required>
+            </div>
+
+            <div id="reset-msg" class="validation-msg hidden"></div>
+
+            <button type="submit" class="btn-primary" id="btn-reset">
+                <span class="btn-text">Send Reset Link</span>
+                <div class="spinner-small hidden"></div>
+            </button>
+            <div style="text-align: center; margin-top: 0.5rem;">
+                <a href="#" id="show-login"
+                    style="font-size: 0.85rem; color: var(--text-muted); text-decoration: none;">← Back to login</a>
+            </div>
+        </form>
+
         <div class="auth-footer">
             <p>Don't have an account? <a href="/signup">Sign up</a></p>
             <p class="home-link"><a href="/">← Back to scanner</a></p>
@@ -36,72 +60,72 @@
 </div>
 
 <style>
-.auth-container {
-    max-width: 450px;
-    margin: 6rem auto;
-}
+    .auth-container {
+        max-width: 450px;
+        margin: 6rem auto;
+    }
 
-.auth-card {
-    padding: 3rem;
-    background: var(--surface);
-    border-radius: 1.5rem;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border);
-}
+    .auth-card {
+        padding: 3rem;
+        background: var(--surface);
+        border-radius: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+    }
 
-.glassmorphism {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
+    .glassmorphism {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
 
-.auth-header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
 
-.auth-header h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--text-main);
-    letter-spacing: -0.025em;
-    margin-bottom: 0.5rem;
-}
+    .auth-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: -0.025em;
+        margin-bottom: 0.5rem;
+    }
 
-.auth-header p {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-}
+    .auth-header p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
 
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
 
-.auth-footer {
-    margin-top: 2rem;
-    text-align: center;
-    font-size: 0.9rem;
-}
+    .auth-footer {
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.9rem;
+    }
 
-.auth-footer a {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-}
+    .auth-footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
 
-.auth-footer a:hover {
-    text-decoration: underline;
-}
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
 
-.home-link {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-}
+    .home-link {
+        margin-top: 1rem;
+        font-size: 0.85rem;
+    }
 
-.home-link a {
-    color: var(--text-muted);
-}
+    .home-link a {
+        color: var(--text-muted);
+    }
 </style>
 {% endblock %}

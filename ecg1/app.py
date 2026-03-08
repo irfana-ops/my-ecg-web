@@ -60,6 +60,10 @@ def login_page():
 def signup_page():
     return render_template('signup.html')
 
+@app.route('/update-password')
+def update_password_page():
+    return render_template('update_password.html')
+
 @app.route('/api/dataset')
 def dataset_sample():
     # Prefer real Kaggle dataset; fall back to synthetic

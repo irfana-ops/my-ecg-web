@@ -48,6 +48,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Auth Handlers ---
     const loginForm = document.getElementById('login-form');
+    const forgotPasswordForm = document.getElementById('forgot-password-form');
+    const showForgotBtn = document.getElementById('show-forgot');
+    const showLoginBtn = document.getElementById('show-login');
+
+    if (showForgotBtn) {
+        showForgotBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.add('hidden');
+            forgotPasswordForm.classList.remove('hidden');
+        });
+    }
+
+    if (showLoginBtn) {
+        showLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            forgotPasswordForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
+    }
+
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -63,6 +83,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 errorDiv.classList.remove('hidden');
                 setLoading(btn, false);
             }
+        });
+    }
+
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('reset-email').value;
+            const btn = document.getElementById('btn-reset');
+            const msgDiv = document.getElementById('reset-msg');
+
+            setLoading(btn, true);
+            // Replace with your actual deployed URL when pushing, or automatically use origin
+            const redirectUrl = window.location.origin + '/update-password';
+            const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: redirectUrl,
+            });
+
+            if (error) {
+                msgDiv.textContent = error.message;
+                msgDiv.className = 'validation-msg error';
+                msgDiv.classList.remove('hidden');
+            } else {
+                msgDiv.textContent = 'Password reset link sent! Check your email.';
+                msgDiv.className = 'validation-msg success';
+                msgDiv.style.color = '#16a34a';
+                msgDiv.style.backgroundColor = '#dcfce7';
+                msgDiv.style.borderColor = '#bbf7d0';
+                msgDiv.classList.remove('hidden');
+            }
+            setLoading(btn, false);
         });
     }
 
@@ -98,6 +148,39 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutBtn.addEventListener('click', async () => {
             await _supabase.auth.signOut();
             window.location.href = '/';
+        });
+    }
+
+    const updatePasswordForm = document.getElementById('update-password-form');
+    if (updatePasswordForm) {
+        // Supabase automatically parses the access_token from the URL hash
+        // when the user clicks the email link, so we just need to call updateUser()
+        updatePasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPassword = document.getElementById('new-password').value;
+            const btn = document.getElementById('btn-update');
+            const msgDiv = document.getElementById('update-msg');
+            const postLinks = document.getElementById('post-update-links');
+
+            setLoading(btn, true);
+            const { error } = await _supabase.auth.updateUser({ password: newPassword });
+
+            if (error) {
+                msgDiv.textContent = error.message;
+                msgDiv.className = 'validation-msg error';
+                msgDiv.classList.remove('hidden');
+            } else {
+                msgDiv.textContent = 'Password successfully updated!';
+                msgDiv.className = 'validation-msg success';
+                msgDiv.style.color = '#16a34a';
+                msgDiv.style.backgroundColor = '#dcfce7';
+                msgDiv.style.borderColor = '#bbf7d0';
+                msgDiv.classList.remove('hidden');
+
+                updatePasswordForm.style.display = 'none';
+                postLinks.style.display = 'block';
+            }
+            setLoading(btn, false);
         });
     }
 
