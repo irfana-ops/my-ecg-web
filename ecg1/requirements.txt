@@ -7,4 +7,6 @@ requests
 pandas
 scikit-learn
 tensorflow-cpu
+Pillow
+matplotlib
 gunicorn
